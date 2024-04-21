@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { OctagonAlert } from 'lucide-react'
 import { Task, TaskProps } from './components/task'
 
+import { DragDropContext, Droppable } from '@hello-pangea/dnd'
+
 function App() {
   const [tasks, setTasks] = useState<TaskProps[]>([])
   const [newTask, setNewTask] = useState('')
@@ -17,6 +19,8 @@ function App() {
   function onDeleteTask(id: string) {
     setTasks(tasks.filter((task) => task.id !== id))
   }
+
+  function OnDragEnd(result: any) {}
 
   return (
     <main className="flex min-h-screen w-full flex-col items-center bg-zinc-950 px-8 pb-5 pt-40">
@@ -40,7 +44,7 @@ function App() {
         </button>
       </form>
 
-      <section className="mt-8 flex min-h-20 w-full max-w-lg flex-col gap-2 rounded-sm border border-green-300 p-4">
+      <section className="mt-8 flex min-h-20 w-full max-w-lg flex-col rounded-sm border border-green-300 p-4">
         {tasks.length === 0 && (
           <div className=" m-auto flex gap-2 text-gray-200">
             <OctagonAlert />
@@ -48,11 +52,31 @@ function App() {
           </div>
         )}
 
-        {tasks.map(({ id, title }) => {
-          return (
-            <Task key={id} title={title} id={id} onDeleteTask={onDeleteTask} />
-          )
-        })}
+        <DragDropContext onDragEnd={OnDragEnd}>
+          <Droppable droppableId="tasks" type="list" direction="vertical">
+            {(provider) => (
+              <article
+                className="flex flex-col  gap-2"
+                ref={provider.innerRef}
+                {...provider.droppableProps}
+              >
+                {tasks.map(({ id, title }, index) => {
+                  return (
+                    <Task
+                      key={id}
+                      title={title}
+                      id={id}
+                      onDeleteTask={onDeleteTask}
+                      index={index}
+                    />
+                  )
+                })}
+
+                {provider.placeholder}
+              </article>
+            )}
+          </Droppable>
+        </DragDropContext>
       </section>
     </main>
   )
