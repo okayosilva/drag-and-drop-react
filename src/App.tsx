@@ -20,7 +20,25 @@ function App() {
     setTasks(tasks.filter((task) => task.id !== id))
   }
 
-  function OnDragEnd(result: any) {}
+  function reorderTasks<T>(list: T[], startIndex: number, endIndex: number) {
+    const result = Array.from(list)
+    const [removed] = result.splice(startIndex, 1)
+    result.splice(endIndex, 0, removed)
+
+    return result
+  }
+
+  function OnDragEnd(result: any) {
+    if (!result.destination) return
+
+    const items = reorderTasks(
+      tasks,
+      result.source.index,
+      result.destination.index,
+    )
+
+    setTasks(items)
+  }
 
   return (
     <main className="flex min-h-screen w-full flex-col items-center bg-zinc-950 px-8 pb-5 pt-40">
@@ -46,7 +64,7 @@ function App() {
 
       <section className="mt-8 flex min-h-20 w-full max-w-lg flex-col rounded-sm border border-green-300 p-4">
         {tasks.length === 0 && (
-          <div className=" m-auto flex gap-2 text-gray-200">
+          <div className=" m-auto flex gap-2 text-gray-400">
             <OctagonAlert />
             <span className="font-semibold">Lista vazia</span>
           </div>
